@@ -4,11 +4,9 @@ import os
 
 app = Flask(__name__)
 
-# ✅ Get DATABASE_URL from Render environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# ✅ Only initialize DB when running locally (not on Render)
-@app.before_first_request
+# Function to initialize DB table
 def init_db():
     if DATABASE_URL:
         try:
@@ -22,10 +20,11 @@ def init_db():
                 """)
                 conn.commit()
         except Exception as e:
-            print("DB Initialization Error:", e)
+            print("Database initialization failed:", e)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    init_db()  # ✅ Ensure table exists on first use
     if request.method == 'POST':
         name = request.form['name']
         if DATABASE_URL:
